@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주기율표 완전정복</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .control-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .state-symbol {
+            font-weight: 600;
+            font-family: monospace;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 1.1em;
+            line-height: 1.2;
+        }
+        
+        #author{
+            color: white;
+            margin-top: 10px;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        .periodic-table {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: auto repeat(18, minmax(0, 1fr));
+            gap: 4px;
+            margin-top: 30px; 
+        }
+
+        .group-header {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.9em;
+            padding: 5px;
+            grid-row: 1;
+        }
+
+        .period-label {
+            align-self: center;
+            text-align: right;
+            padding-right: 10px;
+            color: #764ba2;
+        }
+
+        .element {
+            aspect-ratio: 1;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 0.75em;
+        }
+
+        .element:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .element.highlight {
+            border: 3px solid #ff6b6b;
+            box-shadow: 0 0 15px rgba(255,107,107,0.5);
+        }
+
+        .state {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.9em;
+            font-weight: 400;
+            font-family: monospace;
+            padding: 3px 5px;
+            line-height: 1.2;
+            border-radius: 4px;
+        }
+
+        .state-solid { background-color: #778899; color: white; }
+        .state-liquid { background-color: #5bc0de; color: white; }
+        .state-gas { background-color: #d9534f; color: white; }
+
+        .atomic-number {
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #666;
+            position: absolute;
+            top: 6px;
+            left: 8px;
+        }
+
+        .symbol {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .name {
+            font-size: 0.7em;
+            color: #666;
+            text-align: center;
+            overflow-wrap: break-word;
+        }
+
+        .mass {
+            font-size: 0.65em;
+            color: #999;
+        }
+
+        .empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .arrow-placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            cursor: default;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            color: #764ba2;
+            padding: 8px;
+            font-size: 0.75em;
+            aspect-ratio: 1;
+        }
+        .arrow-text {
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .arrow-symbol {
+            font-size: 2em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .spacer {
+            grid-column: 1 / -1;
+            height: 20px;
+            border: none;
+            background: transparent;
+        }
+
+        .metal { background: #cce5ff; }
+        .metalloid { background: #d4e157; }
+        .nonmetal { background: #ffecb3; }
+
+
+        .element-key-container {
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            max-width: 500px;
+            margin: -10px auto 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        .element-key-sample {
+            flex-shrink: 0;
+        }
+        .element-key-sample .element {
+            font-size: 0.75em; 
+            width: 100px; 
+            height: 100px;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+            border-width: 2px;
+        }
+        .element-key-legend {
+            text-align: left;
+            font-size: 0.9em; 
+        }
+        .element-key-legend ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .element-key-legend li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .element-key-legend .key-label {
+            font-weight: 600;
+            color: #333;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .element-detail h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .quiz-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .quiz-settings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .quiz-settings div {
+            display: flex;
+            flex-direction: column;
+        }
+        .quiz-settings label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        .quiz-settings input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        #quizErrorMessage {
+            color: red;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn-cancel-quiz {
+            padding: 8px 16px;
+            font-size: 14px;
+            background-color: #f56565;
+        }
+        .btn-cancel-quiz:hover {
+            background-color: #e53e3e;
+        }
+
+        .quiz-question-container {
+            margin-bottom: 20px;
+        }
+        .quiz-question-main {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .quiz-question-hint {
+            font-size: 1.1em;
+            color: #3e05da;
+            font-style: bold;
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-radius: 8px;
+            display: inline-block;
+            border: 1px solid #b83434;
+        }
+
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quiz-option {
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .quiz-option:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+        }
+
+        .quiz-option.correct {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .quiz-option.wrong {
+            background: #f56565;
+            color: white;
+            border-color: #f56565;
+        }
+
+        .score {
+            font-size: 1.3em;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        @media (max-width: 1200px) { 
+        }
+
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .element {
+                font-size: 0.6em;
+                padding: 4px;
+            }
+            .atomic-number {
+                top: 4px;
+                left: 4px;
+            }
+            .state {
+                top: 4px;
+                right: 4px;
+            }
+
+
+             .element-key-sample .element {
+                 font-size: 0.6em; 
+                 width: 80px;
+                 height: 80px;
+                 padding: 4px;
+             }
+             .element-key-legend {
+                 font-size: 0.85em;
+             }
+               .element-key-legend .key-label {
+                 min-width: 70px;
+               }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚛️ 주기율표 완전 정복</h1>
+            <p>고등 통합과학1(신영준) | II.물질의 규칙성 | 2.원소의 규칙성과 결합 | 58~61쪽<br/>
+            <span style='background-color:#ee357c1f'>※ 화면을 최대화해서 보세요!!</span></p>
+        </header>
+
+        <div class="controls" id="mainControls">
+            <div class="element-key-container">
+                 <div class="element-key-sample">
+                       <div class="element">
+                             <div class="atomic-number">6</div>
+                             <div class="state state-solid">S</div>
+                             <div class="symbol">C</div>
+                             <div class="name">탄소</div>
+                             <div class="mass">12.01</div>
+                       </div>
+                 </div>
+                 <div class="element-key-legend">
+                       <ul>
+                             <li><span class="key-label">① (좌측상단)</span> 원자번호</li>
+                             <li><span class="key-label">② (우측상단)</span> 상태 (고체/액체/기체)</li>
+                             <li><span class="key-label">③ (중앙)</span> 원소기호</li>
+                             <li><span class="key-label">④ (하단이름)</span> 원소이름</li>
+                             <li><span class="key-label">⑤ (최하단)</span> 원자량</li>
+                       </ul>
+                 </div>
+            </div>
+
+
+            <div class="control-row">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="원소명, 기호, 원자번호로 검색...">
+                </div>
+                <button class="btn btn-primary" onclick="toggleQuizContainer()">퀴즈 모드</button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color metal"></div>
+                    <span>금속</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color metalloid"></div>
+                    <span>준금속</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color nonmetal"></div>
+                    <span>비금속</span>
+                </div>
+                <div class="legend-item" style="margin-left: 20px;">
+                    <span class="state-symbol state-solid">S</span>
+                    <span>고체</span>
+                </div>
+                <div class="legend-item">
+                    <span class="state-symbol state-liquid">L</span>
+                    <span>액체</span>
+                </div>
+                <div class="legend-item">
+                    <span class="state-symbol state-gas">G</span>
+                    <span>기체</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="periodic-table" id="periodicTable">
+            
+            <div class="table-grid" id="tableGrid">
+            </div>
+        </div>
+        
+        <div id="author">제작 및 문의 : vega@buseol.kr</div>
+
+        <div class="quiz-container" id="quizContainer" style="display: none;">
+
+            <div id="quizSetup">
+                <h2>🎯 퀴즈 설정</h2>
+                <p>시작 원소부터 마지막 원소까지의 내용이 랜덤 퀴즈로 생성됩니다.</p>
+                <div class="quiz-settings">                    
+                    <div>
+                        <label for="quizStartNum">시작 원소 번호:</label>
+                        <input type="number" id="quizStartNum" value="1" min="1" max="118" class="quiz-input">
+                    </div>
+                    <div>
+                        <label for="quizEndNum">마지막 원소 번호:</label>
+                        <input type="number" id="quizEndNum" value="20" min="1" max="118" class="quiz-input">
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label for="quizNumQuestions">문제 수:</label>
+                        <input type="number" id="quizNumQuestions" value="10" min="1" max="50" class="quiz-input">
+                    </div>
+                </div>
+                <p id="quizErrorMessage"></p>
+                <button class="btn btn-primary" onclick="startQuiz()" style="margin-top: 20px;">퀴즈 시작</button>
+                <button class="btn btn-secondary" onclick="toggleQuizContainer()" style="margin-top: 20px;">돌아가기</button>
+            </div>
+
+            <div id="quizInProgress" style="display: none;">
+                <div class="quiz-header">
+                    <div class="score" id="score">문제: 0 / 0 | 점수: 0</div>
+                    <button class="btn btn-secondary btn-cancel-quiz" onclick="toggleQuizContainer()">퀴즈 중단</button>
+                </div>
+                <div class="quiz-question-container">
+                    <div class="quiz-question-main" id="quizQuestionMain"></div>
+                    <div class="quiz-question-hint" id="quizQuestionHint"></div>
+                </div>
+                <div class="quiz-options" id="quizOptions"></div>
+            </div>
+
+            <div id="finalScoreContainer" style="display: none;">
+                <h2>퀴즈 완료!</h2>
+                <div class="score" id="finalScore" style="font-size: 1.5em; margin: 20px 0;">최종 점수: 0 / 0</div>
+                <button class="btn btn-primary" onclick="startQuiz()" style="margin-top: 20px;">다시 풀기</button>
+                <button class="btn btn-secondary" onclick="toggleQuizContainer()" style="margin-top: 20px;">메인으로</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="element-detail" id="elementDetail"></div>
+        </div>
+    </div>
+
+    <script>
+        const elements = [ 
+            {num: 1, symbol: 'H', name: '수소', nameEn: 'Hydrogen', mass: 1.008, category: 'nonmetal', electron: '1s¹', group: 1, period: 1, renderPeriod: 1, renderGroup: 1, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 2, symbol: 'He', name: '헬륨', nameEn: 'Helium', mass: 4.003, category: 'noble', electron: '1s²', group: 18, period: 1, renderPeriod: 1, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 3, symbol: 'Li', name: '리튬', nameEn: 'Lithium', mass: 6.941, category: 'alkali', electron: '[He] 2s¹', group: 1, period: 2, renderPeriod: 2, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 4, symbol: 'Be', name: '베릴륨', nameEn: 'Beryllium', mass: 9.012, category: 'alkaline-earth', electron: '[He] 2s²', group: 2, period: 2, renderPeriod: 2, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 5, symbol: 'B', name: '붕소', nameEn: 'Boron', mass: 10.81, category: 'metalloid', electron: '[He] 2s² 2p¹', group: 13, period: 2, renderPeriod: 2, renderGroup: 13, simpleCategory: 'metalloid', state: 'S'},
+            {num: 6, symbol: 'C', name: '탄소', nameEn: 'Carbon', mass: 12.01, category: 'nonmetal', electron: '[He] 2s² 2p²', group: 14, period: 2, renderPeriod: 2, renderGroup: 14, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 7, symbol: 'N', name: '질소', nameEn: 'Nitrogen', mass: 14.01, category: 'nonmetal', electron: '[He] 2s² 2p³', group: 15, period: 2, renderPeriod: 2, renderGroup: 15, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 8, symbol: 'O', name: '산소', nameEn: 'Oxygen', mass: 16.00, category: 'nonmetal', electron: '[He] 2s² 2p⁴', group: 16, period: 2, renderPeriod: 2, renderGroup: 16, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 9, symbol: 'F', name: '플루오린', nameEn: 'Fluorine', mass: 19.00, category: 'halogen', electron: '[He] 2s² 2p⁵', group: 17, period: 2, renderPeriod: 2, renderGroup: 17, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 10, symbol: 'Ne', name: '네온', nameEn: 'Neon', mass: 20.18, category: 'noble', electron: '[He] 2s² 2p⁶', group: 18, period: 2, renderPeriod: 2, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 11, symbol: 'Na', name: '나트륨', nameEn: 'Sodium', mass: 22.99, category: 'alkali', electron: '[Ne] 3s¹', group: 1, period: 3, renderPeriod: 3, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 12, symbol: 'Mg', name: '마그네슘', nameEn: 'Magnesium', mass: 24.31, category: 'alkaline-earth', electron: '[Ne] 3s²', group: 2, period: 3, renderPeriod: 3, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 13, symbol: 'Al', name: '알루미늄', nameEn: 'Aluminum', mass: 26.98, category: 'post-transition', electron: '[Ne] 3s² 3p¹', group: 13, period: 3, renderPeriod: 3, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 14, symbol: 'Si', name: '규소', nameEn: 'Silicon', mass: 28.09, category: 'metalloid', electron: '[Ne] 3s² 3p²', group: 14, period: 3, renderPeriod: 3, renderGroup: 14, simpleCategory: 'metalloid', state: 'S'},
+            {num: 15, symbol: 'P', name: '인', nameEn: 'Phosphorus', mass: 30.97, category: 'nonmetal', electron: '[Ne] 3s² 3p³', group: 15, period: 3, renderPeriod: 3, renderGroup: 15, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 16, symbol: 'S', name: '황', nameEn: 'Sulfur', mass: 32.07, category: 'nonmetal', electron: '[Ne] 3s² 3p⁴', group: 16, period: 3, renderPeriod: 3, renderGroup: 16, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 17, symbol: 'Cl', name: '염소', nameEn: 'Chlorine', mass: 35.45, category: 'halogen', electron: '[Ne] 3s² 3p⁵', group: 17, period: 3, renderPeriod: 3, renderGroup: 17, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 18, symbol: 'Ar', name: '아르곤', nameEn: 'Argon', mass: 39.95, category: 'noble', electron: '[Ne] 3s² 3p⁶', group: 18, period: 3, renderPeriod: 3, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 19, symbol: 'K', name: '칼륨', nameEn: 'Potassium', mass: 39.10, category: 'alkali', electron: '[Ar] 4s¹', group: 1, period: 4, renderPeriod: 4, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 20, symbol: 'Ca', name: '칼슘', nameEn: 'Calcium', mass: 40.08, category: 'alkaline-earth', electron: '[Ar] 4s²', group: 2, period: 4, renderPeriod: 4, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 21, symbol: 'Sc', name: '스칸듐', nameEn: 'Scandium', mass: 44.96, category: 'transition', electron: '[Ar] 3d¹ 4s²', group: 3, period: 4, renderPeriod: 4, renderGroup: 3, simpleCategory: 'metal', state: 'S'},
+            {num: 22, symbol: 'Ti', name: '타이타늄', nameEn: 'Titanium', mass: 47.87, category: 'transition', electron: '[Ar] 3d² 4s²', group: 4, period: 4, renderPeriod: 4, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 23, symbol: 'V', name: '바나듐', nameEn: 'Vanadium', mass: 50.94, category: 'transition', electron: '[Ar] 3d³ 4s²', group: 5, period: 4, renderPeriod: 4, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 24, symbol: 'Cr', name: '크로뮴', nameEn: 'Chromium', mass: 52.00, category: 'transition', electron: '[Ar] 3d⁵ 4s¹', group: 6, period: 4, renderPeriod: 4, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 25, symbol: 'Mn', name: '망가니즈', nameEn: 'Manganese', mass: 54.94, category: 'transition', electron: '[Ar] 3d⁵ 4s²', group: 7, period: 4, renderPeriod: 4, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 26, symbol: 'Fe', name: '철', nameEn: 'Iron', mass: 55.85, category: 'transition', electron: '[Ar] 3d⁶ 4s²', group: 8, period: 4, renderPeriod: 4, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 27, symbol: 'Co', name: '코발트', nameEn: 'Cobalt', mass: 58.93, category: 'transition', electron: '[Ar] 3d⁷ 4s²', group: 9, period: 4, renderPeriod: 4, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 28, symbol: 'Ni', name: '니켈', nameEn: 'Nickel', mass: 58.69, category: 'transition', electron: '[Ar] 3d⁸ 4s²', group: 10, period: 4, renderPeriod: 4, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 29, symbol: 'Cu', name: '구리', nameEn: 'Copper', mass: 63.55, category: 'transition', electron: '[Ar] 3d¹⁰ 4s¹', group: 11, period: 4, renderPeriod: 4, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 30, symbol: 'Zn', name: '아연', nameEn: 'Zinc', mass: 65.38, category: 'transition', electron: '[Ar] 3d¹⁰ 4s²', group: 12, period: 4, renderPeriod: 4, renderGroup: 12, simpleCategory: 'metal', state: 'S'},
+            {num: 31, symbol: 'Ga', name: '갈륨', nameEn: 'Gallium', mass: 69.72, category: 'post-transition', electron: '[Ar] 3d¹⁰ 4s² 4p¹', group: 13, period: 4, renderPeriod: 4, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 32, symbol: 'Ge', name: '저마늄', nameEn: 'Germanium', mass: 72.63, category: 'metalloid', electron: '[Ar] 3d¹⁰ 4s² 4p²', group: 14, period: 4, renderPeriod: 4, renderGroup: 14, simpleCategory: 'metalloid', state: 'S'},
+            {num: 33, symbol: 'As', name: '비소', nameEn: 'Arsenic', mass: 74.92, category: 'metalloid', electron: '[Ar] 3d¹⁰ 4s² 4p³', group: 15, period: 4, renderPeriod: 4, renderGroup: 15, simpleCategory: 'metalloid', state: 'S'},
+            {num: 34, symbol: 'Se', name: '셀레늄', nameEn: 'Selenium', mass: 78.97, category: 'nonmetal', electron: '[Ar] 3d¹⁰ 4s² 4p⁴', group: 16, period: 4, renderPeriod: 4, renderGroup: 16, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 35, symbol: 'Br', name: '브로민', nameEn: 'Bromine', mass: 79.90, category: 'halogen', electron: '[Ar] 3d¹⁰ 4s² 4p⁵', group: 17, period: 4, renderPeriod: 4, renderGroup: 17, simpleCategory: 'nonmetal', state: 'L'},
+            {num: 36, symbol: 'Kr', name: '크립톤', nameEn: 'Krypton', mass: 83.80, category: 'noble', electron: '[Ar] 3d¹⁰ 4s² 4p⁶', group: 18, period: 4, renderPeriod: 4, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 37, symbol: 'Rb', name: '루비듐', nameEn: 'Rubidium', mass: 85.47, category: 'alkali', electron: '[Kr] 5s¹', group: 1, period: 5, renderPeriod: 5, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 38, symbol: 'Sr', name: '스트론튬', nameEn: 'Strontium', mass: 87.62, category: 'alkaline-earth', electron: '[Kr] 5s²', group: 2, period: 5, renderPeriod: 5, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 39, symbol: 'Y', name: '이트륨', nameEn: 'Yttrium', mass: 88.91, category: 'transition', electron: '[Kr] 4d¹ 5s²', group: 3, period: 5, renderPeriod: 5, renderGroup: 3, simpleCategory: 'metal', state: 'S'},
+            {num: 40, symbol: 'Zr', name: '지르코늄', nameEn: 'Zirconium', mass: 91.22, category: 'transition', electron: '[Kr] 4d² 5s²', group: 4, period: 5, renderPeriod: 5, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 41, symbol: 'Nb', name: '나이오븀', nameEn: 'Niobium', mass: 92.91, category: 'transition', electron: '[Kr] 4d⁴ 5s¹', group: 5, period: 5, renderPeriod: 5, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 42, symbol: 'Mo', name: '몰리브덴', nameEn: 'Molybdenum', mass: 95.95, category: 'transition', electron: '[Kr] 4d⁵ 5s¹', group: 6, period: 5, renderPeriod: 5, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 43, symbol: 'Tc', name: '테크네튬', nameEn: 'Technetium', mass: '(98)', category: 'transition', electron: '[Kr] 4d⁵ 5s²', group: 7, period: 5, renderPeriod: 5, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 44, symbol: 'Ru', name: '루테늄', nameEn: 'Ruthenium', mass: 101.07, category: 'transition', electron: '[Kr] 4d⁷ 5s¹', group: 8, period: 5, renderPeriod: 5, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 45, symbol: 'Rh', name: '로듐', nameEn: 'Rhodium', mass: 102.91, category: 'transition', electron: '[Kr] 4d⁸ 5s¹', group: 9, period: 5, renderPeriod: 5, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 46, symbol: 'Pd', name: '팔라듐', nameEn: 'Palladium', mass: 106.42, category: 'transition', electron: '[Kr] 4d¹⁰', group: 10, period: 5, renderPeriod: 5, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 47, symbol: 'Ag', name: '은', nameEn: 'Silver', mass: 107.87, category: 'transition', electron: '[Kr] 4d¹⁰ 5s¹', group: 11, period: 5, renderPeriod: 5, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 48, symbol: 'Cd', name: '카드뮴', nameEn: 'Cadmium', mass: 112.41, category: 'transition', electron: '[Kr] 4d¹⁰ 5s²', group: 12, period: 5, renderPeriod: 5, renderGroup: 12, simpleCategory: 'metal', state: 'S'},
+            {num: 49, symbol: 'In', name: '인듐', nameEn: 'Indium', mass: 114.82, category: 'post-transition', electron: '[Kr] 4d¹⁰ 5s² 5p¹', group: 13, period: 5, renderPeriod: 5, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 50, symbol: 'Sn', name: '주석', nameEn: 'Tin', mass: 118.71, category: 'post-transition', electron: '[Kr] 4d¹⁰ 5s² 5p²', group: 14, period: 5, renderPeriod: 5, renderGroup: 14, simpleCategory: 'metal', state: 'S'},
+            {num: 51, symbol: 'Sb', name: '안티모니', nameEn: 'Antimony', mass: 121.76, category: 'metalloid', electron: '[Kr] 4d¹⁰ 5s² 5p³', group: 15, period: 5, renderPeriod: 5, renderGroup: 15, simpleCategory: 'metalloid', state: 'S'},
+            {num: 52, symbol: 'Te', name: '텔루륨', nameEn: 'Tellurium', mass: 127.60, category: 'metalloid', electron: '[Kr] 4d¹⁰ 5s² 5p⁴', group: 16, period: 5, renderPeriod: 5, renderGroup: 16, simpleCategory: 'metalloid', state: 'S'},
+            {num: 53, symbol: 'I', name: '아이오딘', nameEn: 'Iodine', mass: 126.90, category: 'halogen', electron: '[Kr] 4d¹⁰ 5s² 5p⁵', group: 17, period: 5, renderPeriod: 5, renderGroup: 17, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 54, symbol: 'Xe', name: '제논', nameEn: 'Xenon', mass: 131.29, category: 'noble', electron: '[Kr] 4d¹⁰ 5s² 5p⁶', group: 18, period: 5, renderPeriod: 5, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 55, symbol: 'Cs', name: '세슘', nameEn: 'Cesium', mass: 132.91, category: 'alkali', electron: '[Xe] 6s¹', group: 1, period: 6, renderPeriod: 6, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 56, symbol: 'Ba', name: '바륨', nameEn: 'Barium', mass: 137.33, category: 'alkaline-earth', electron: '[Xe] 6s²', group: 2, period: 6, renderPeriod: 6, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 57, symbol: 'La', name: '란타넘', nameEn: 'Lanthanum', mass: 138.91, category: 'lanthanide', electron: '[Xe] 5d¹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 58, symbol: 'Ce', name: '세륨', nameEn: 'Cerium', mass: 140.12, category: 'lanthanide', electron: '[Xe] 4f¹ 5d¹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 59, symbol: 'Pr', name: '프라세오디뮴', nameEn: 'Praseodymium', mass: 140.91, category: 'lanthanide', electron: '[Xe] 4f³ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 60, symbol: 'Nd', name: '네오디뮴', nameEn: 'Neodymium', mass: 144.24, category: 'lanthanide', electron: '[Xe] 4f⁴ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 61, symbol: 'Pm', name: '프로메튬', nameEn: 'Promethium', mass: '(145)', category: 'lanthanide', electron: '[Xe] 4f⁵ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 62, symbol: 'Sm', name: '사마륨', nameEn: 'Samarium', mass: 150.36, category: 'lanthanide', electron: '[Xe] 4f⁶ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 63, symbol: 'Eu', name: '유로퓸', nameEn: 'Europium', mass: 151.96, category: 'lanthanide', electron: '[Xe] 4f⁷ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 64, symbol: 'Gd', name: '가돌리늄', nameEn: 'Gadolinium', mass: 157.25, category: 'lanthanide', electron: '[Xe] 4f⁷ 5d¹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 65, symbol: 'Tb', name: '터븀', nameEn: 'Terbium', mass: 158.93, category: 'lanthanide', electron: '[Xe] 4f⁹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 12, simpleCategory: 'metal', state: 'S'},
+            {num: 66, symbol: 'Dy', name: '디스프로슘', nameEn: 'Dysprosium', mass: 162.50, category: 'lanthanide', electron: '[Xe] 4f¹⁰ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 67, symbol: 'Ho', name: '홀뮴', nameEn: 'Holmium', mass: 164.93, category: 'lanthanide', electron: '[Xe] 4f¹¹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 14, simpleCategory: 'metal', state: 'S'},
+            {num: 68, symbol: 'Er', name: '어븀', nameEn: 'Erbium', mass: 167.26, category: 'lanthanide', electron: '[Xe] 4f¹² 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 15, simpleCategory: 'metal', state: 'S'},
+            {num: 69, symbol: 'Tm', name: '툴륨', nameEn: 'Thulium', mass: 168.93, category: 'lanthanide', electron: '[Xe] 4f¹³ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 16, simpleCategory: 'metal', state: 'S'},
+            {num: 70, symbol: 'Yb', name: '이터븀', nameEn: 'Ytterbium', mass: 173.05, category: 'lanthanide', electron: '[Xe] 4f¹⁴ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 17, simpleCategory: 'metal', state: 'S'},
+            {num: 71, symbol: 'Lu', name: '루테튬', nameEn: 'Lutetium', mass: 174.97, category: 'lanthanide', electron: '[Xe] 4f¹⁴ 5d¹ 6s²', group: 3, period: 6, renderPeriod: 9, renderGroup: 18, simpleCategory: 'metal', state: 'S'},
+            {num: 72, symbol: 'Hf', name: '하프늄', nameEn: 'Hafnium', mass: 178.49, category: 'transition', electron: '[Xe] 4f¹⁴ 5d² 6s²', group: 4, period: 6, renderPeriod: 6, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 73, symbol: 'Ta', name: '탄탈럼', nameEn: 'Tantalum', mass: 180.95, category: 'transition', electron: '[Xe] 4f¹⁴ 5d³ 6s²', group: 5, period: 6, renderPeriod: 6, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 74, symbol: 'W', name: '텅스텐', nameEn: 'Tungsten', mass: 183.84, category: 'transition', electron: '[Xe] 4f¹⁴ 5d⁴ 6s²', group: 6, period: 6, renderPeriod: 6, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 75, symbol: 'Re', name: '레늄', nameEn: 'Rhenium', mass: 186.21, category: 'transition', electron: '[Xe] 4f¹⁴ 5d⁵ 6s²', group: 7, period: 6, renderPeriod: 6, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 76, symbol: 'Os', name: '오스뮴', nameEn: 'Osmium', mass: 190.23, category: 'transition', electron: '[Xe] 4f¹⁴ 5d⁶ 6s²', group: 8, period: 6, renderPeriod: 6, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 77, symbol: 'Ir', name: '이리듐', nameEn: 'Iridium', mass: 192.22, category: 'transition', electron: '[Xe] 4f¹⁴ 5d⁷ 6s²', group: 9, period: 6, renderPeriod: 6, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 78, symbol: 'Pt', name: '백금', nameEn: 'Platinum', mass: 195.08, category: 'transition', electron: '[Xe] 4f¹⁴ 5d⁹ 6s¹', group: 10, period: 6, renderPeriod: 6, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 79, symbol: 'Au', name: '금', nameEn: 'Gold', mass: 196.97, category: 'transition', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s¹', group: 11, period: 6, renderPeriod: 6, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 80, symbol: 'Hg', name: '수은', nameEn: 'Mercury', mass: 200.59, category: 'transition', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s²', group: 12, period: 6, renderPeriod: 6, renderGroup: 12, simpleCategory: 'metal', state: 'L'},
+            {num: 81, symbol: 'Tl', name: '탈륨', nameEn: 'Thallium', mass: 204.38, category: 'post-transition', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹', group: 13, period: 6, renderPeriod: 6, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 82, symbol: 'Pb', name: '납', nameEn: 'Lead', mass: 207.2, category: 'post-transition', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²', group: 14, period: 6, renderPeriod: 6, renderGroup: 14, simpleCategory: 'metal', state: 'S'},
+            {num: 83, symbol: 'Bi', name: '비스무트', nameEn: 'Bismuth', mass: 208.98, category: 'post-transition', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³', group: 15, period: 6, renderPeriod: 6, renderGroup: 15, simpleCategory: 'metal', state: 'S'},
+            {num: 84, symbol: 'Po', name: '폴로늄', nameEn: 'Polonium', mass: '(209)', category: 'metalloid', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴', group: 16, period: 6, renderPeriod: 6, renderGroup: 16, simpleCategory: 'metalloid', state: 'S'},
+            {num: 85, symbol: 'At', name: '아스타틴', nameEn: 'Astatine', mass: '(210)', category: 'halogen', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵', group: 17, period: 6, renderPeriod: 6, renderGroup: 17, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 86, symbol: 'Rn', name: '라돈', nameEn: 'Radon', mass: '(222)', category: 'noble', electron: '[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶', group: 18, period: 6, renderPeriod: 6, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+            {num: 87, symbol: 'Fr', name: '프랑슘', nameEn: 'Francium', mass: '(223)', category: 'alkali', electron: '[Rn] 7s¹', group: 1, period: 7, renderPeriod: 7, renderGroup: 1, simpleCategory: 'metal', state: 'S'},
+            {num: 88, symbol: 'Ra', name: '라듐', nameEn: 'Radium', mass: '(226)', category: 'alkaline-earth', electron: '[Rn] 7s²', group: 2, period: 7, renderPeriod: 7, renderGroup: 2, simpleCategory: 'metal', state: 'S'},
+            {num: 89, symbol: 'Ac', name: '악티늄', nameEn: 'Actinium', mass: '(227)', category: 'actinide', electron: '[Rn] 6d¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 90, symbol: 'Th', name: '토륨', nameEn: 'Thorium', mass: 232.04, category: 'actinide', electron: '[Rn] 6d² 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 91, symbol: 'Pa', name: '프로트악티늄', nameEn: 'Protactinium', mass: 231.04, category: 'actinide', electron: '[Rn] 5f² 6d¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 92, symbol: 'U', name: '우라늄', nameEn: 'Uranium', mass: 238.03, category: 'actinide', electron: '[Rn] 5f³ 6d¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 93, symbol: 'Np', name: '넵투늄', nameEn: 'Neptunium', mass: '(237)', category: 'actinide', electron: '[Rn] 5f⁴ 6d¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 94, symbol: 'Pu', name: '플루토늄', nameEn: 'Plutonium', mass: '(244)', category: 'actinide', electron: '[Rn] 5f⁶ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 95, symbol: 'Am', name: '아메리슘', nameEn: 'Americium', mass: '(243)', category: 'actinide', electron: '[Rn] 5f⁷ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 96, symbol: 'Cm', name: '퀴륨', nameEn: 'Curium', mass: '(247)', category: 'actinide', electron: '[Rn] 5f⁷ 6d¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 97, symbol: 'Bk', name: '버클륨', nameEn: 'Berkelium', mass: '(247)', category: 'actinide', electron: '[Rn] 5f⁹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 12, simpleCategory: 'metal', state: 'S'},
+            {num: 98, symbol: 'Cf', name: '캘리포늄', nameEn: 'Californium', mass: '(251)', category: 'actinide', electron: '[Rn] 5f¹⁰ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 99, symbol: 'Es', name: '아인슈타이늄', nameEn: 'Einsteinium', mass: '(252)', category: 'actinide', electron: '[Rn] 5f¹¹ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 14, simpleCategory: 'metal', state: 'S'},
+            {num: 100, symbol: 'Fm', name: '페르뮴', nameEn: 'Fermium', mass: '(257)', category: 'actinide', electron: '[Rn] 5f¹² 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 15, simpleCategory: 'metal', state: 'S'},
+            {num: 101, symbol: 'Md', name: '멘델레븀', nameEn: 'Mendelevium', mass: '(258)', category: 'actinide', electron: '[Rn] 5f¹³ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 16, simpleCategory: 'metal', state: 'S'},
+            {num: 102, symbol: 'No', name: '노벨륨', nameEn: 'Nobelium', mass: '(259)', category: 'actinide', electron: '[Rn] 5f¹⁴ 7s²', group: 3, period: 7, renderPeriod: 10, renderGroup: 17, simpleCategory: 'metal', state: 'S'},
+            {num: 103, symbol: 'Lr', name: '로렌슘', nameEn: 'Lawrencium', mass: '(266)', category: 'actinide', electron: '[Rn] 5f¹⁴ 7s² 7p¹', group: 3, period: 7, renderPeriod: 10, renderGroup: 18, simpleCategory: 'metal', state: 'S'},
+            {num: 104, symbol: 'Rf', name: '러더포듐', nameEn: 'Rutherfordium', mass: '(267)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d² 7s²', group: 4, period: 7, renderPeriod: 7, renderGroup: 4, simpleCategory: 'metal', state: 'S'},
+            {num: 105, symbol: 'Db', name: '더브늄', nameEn: 'Dubnium', mass: '(268)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d³ 7s²', group: 5, period: 7, renderPeriod: 7, renderGroup: 5, simpleCategory: 'metal', state: 'S'},
+            {num: 106, symbol: 'Sg', name: '시보늄', nameEn: 'Seaborgium', mass: '(269)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d⁴ 7s²', group: 6, period: 7, renderPeriod: 7, renderGroup: 6, simpleCategory: 'metal', state: 'S'},
+            {num: 107, symbol: 'Bh', name: '보륨', nameEn: 'Bohrium', mass: '(270)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d⁵ 7s²', group: 7, period: 7, renderPeriod: 7, renderGroup: 7, simpleCategory: 'metal', state: 'S'},
+            {num: 108, symbol: 'Hs', name: '하슘', nameEn: 'Hassium', mass: '(277)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d⁶ 7s²', group: 8, period: 7, renderPeriod: 7, renderGroup: 8, simpleCategory: 'metal', state: 'S'},
+            {num: 109, symbol: 'Mt', name: '마이트너륨', nameEn: 'Meitnerium', mass: '(278)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d⁷ 7s²', group: 9, period: 7, renderPeriod: 7, renderGroup: 9, simpleCategory: 'metal', state: 'S'},
+            {num: 110, symbol: 'Ds', name: '다름슈타튬', nameEn: 'Darmstadtium', mass: '(281)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d⁹ 7s¹', group: 10, period: 7, renderPeriod: 7, renderGroup: 10, simpleCategory: 'metal', state: 'S'},
+            {num: 111, symbol: 'Rg', name: '뢴트게늄', nameEn: 'Roentgenium', mass: '(282)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s¹', group: 11, period: 7, renderPeriod: 7, renderGroup: 11, simpleCategory: 'metal', state: 'S'},
+            {num: 112, symbol: 'Cn', name: '코페르니슘', nameEn: 'Copernicium', mass: '(285)', category: 'transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s²', group: 12, period: 7, renderPeriod: 7, renderGroup: 12, simpleCategory: 'metal', state: 'L'},
+            {num: 113, symbol: 'Nh', name: '니호늄', nameEn: 'Nihonium', mass: '(286)', category: 'post-transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹', group: 13, period: 7, renderPeriod: 7, renderGroup: 13, simpleCategory: 'metal', state: 'S'},
+            {num: 114, symbol: 'Fl', name: '플레로븀', nameEn: 'Flerovium', mass: '(289)', category: 'post-transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²', group: 14, period: 7, renderPeriod: 7, renderGroup: 14, simpleCategory: 'metal', state: 'S'},
+            {num: 115, symbol: 'Mc', name: '모스크븀', nameEn: 'Moscovium', mass: '(290)', category: 'post-transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³', group: 15, period: 7, renderPeriod: 7, renderGroup: 15, simpleCategory: 'metal', state: 'S'},
+            {num: 116, symbol: 'Lv', name: '리버모륨', nameEn: 'Livermorium', mass: '(293)', category: 'post-transition', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴', group: 16, period: 7, renderPeriod: 7, renderGroup: 16, simpleCategory: 'metal', state: 'S'},
+            {num: 117, symbol: 'Ts', name: '테네신', nameEn: 'Tennessine', mass: '(294)', category: 'halogen', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵', group: 17, period: 7, renderPeriod: 7, renderGroup: 17, simpleCategory: 'nonmetal', state: 'S'},
+            {num: 118, symbol: 'Og', name: '오가네손', nameEn: 'Oganesson', mass: '(294)', category: 'noble', electron: '[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶', group: 18, period: 7, renderPeriod: 7, renderGroup: 18, simpleCategory: 'nonmetal', state: 'G'},
+        ];
+
+        let quizMode = false;
+        let quizScore = 0;
+        let currentQuestion = null;
+
+        let quizTotalQuestions = 10;
+        let currentQuizQuestionNum = 0;
+        let quizElements = [];
+
+        function renderTable() {
+            const grid = document.getElementById('tableGrid');
+            const keySampleContainer = document.querySelector('.element-key-container');
+            grid.innerHTML = '';
+
+            const groupNames = {
+                1: '알칼리 금속(H제외)',
+                2: '알칼리 토금속',
+                13: '붕소족',
+                14: '탄소족',
+                15: '질소족',
+                16: '산소족',
+                17: '할로겐',
+                18: '비활성 기체'
+            };
+
+            for (let group = 1; group <= 18; group++) {
+                const header = document.createElement('div');
+                header.className = 'group-header';
+                
+                const groupNumText = `${group}족`;
+                const familyName = groupNames[group] || null;
+
+                if (familyName) {
+                    header.innerHTML = `${groupNumText}<br><span style="font-size: 0.85em; font-weight: normal; line-height: 1.2; color:#f95">${familyName}</span>`;
+                } else {
+                    header.textContent = groupNumText;
+                }
+
+                header.style.gridColumn = group + 1;
+                header.style.gridRow = 1;
+                grid.appendChild(header);
+            }
+
+
+            for (let period = 1; period <= 10; period++) {
+                if (period >= 1 && period <= 7) {
+                    const pHeader = document.createElement('div');
+                    pHeader.className = 'group-header period-label';
+                    pHeader.textContent = `${period}주기`;
+                    pHeader.style.gridRow = period + 1;
+                    pHeader.style.gridColumn = 1;
+                    grid.appendChild(pHeader);
+                }
+
+                if (period === 8) {
+                    const spacer = document.createElement('div');
+                    spacer.className = 'element empty spacer';
+                    spacer.style.gridRow = period + 1;
+                    spacer.style.gridColumn = "1 / -1";
+                    grid.appendChild(spacer);
+                    continue;
+                }
+
+                if (period === 9) {
+                     const pHeader = document.createElement('div');
+                    pHeader.className = 'group-header period-label';
+                    pHeader.textContent = `란타넘족`;
+                    pHeader.style.gridRow = period + 1;
+                    pHeader.style.gridColumn = 1;
+                    pHeader.style.fontSize = '0.8em';
+                    grid.appendChild(pHeader);
+                }
+
+                if (period === 10) {
+                     const pHeader = document.createElement('div');
+                    pHeader.className = 'group-header period-label';
+                    pHeader.textContent = `악티늄족`;
+                    pHeader.style.gridRow = period + 1;
+                    pHeader.style.gridColumn = 1;
+                    pHeader.style.fontSize = '0.8em';
+                    grid.appendChild(pHeader);
+                }
+
+
+                for (let group = 1; group <= 18; group++) {
+                    const element = elements.find(e => e.renderPeriod === period && e.renderGroup === group);
+                    const div = document.createElement('div');
+                    div.style.gridRow = period + 1;
+                    div.style.gridColumn = group + 1;
+
+                    if (element) { 
+                        let stateSymbol = '';
+                        let stateClass = '';
+                        if (element.state === 'S') { stateSymbol = 'S'; stateClass = 'state-solid'; }
+                        else if (element.state === 'L') { stateSymbol = 'L'; stateClass = 'state-liquid'; }
+                        else if (element.state === 'G') { stateSymbol = 'G'; stateClass = 'state-gas'; }
+
+                        div.className = `element ${element.simpleCategory}`;
+                        div.dataset.num = element.num;
+                        div.innerHTML = `
+                            <div class="atomic-number">${element.num}</div>
+                            <div class="state ${stateClass}">${stateSymbol}</div>
+                            <div class="symbol">${element.symbol}</div>
+                            <div class="name">${element.name}</div>
+                            <div class="mass">${element.mass}</div>`;
+                        div.onclick = () => showDetail(element);
+                    } else {
+                        if (period === 6 && group === 3) {
+                            div.className = 'element empty arrow-placeholder';
+                            div.innerHTML = `<span class="arrow-text">57-71</span><span class="arrow-symbol">&darr;</span>`;
+                            div.title = '란타넘족 (아래 참조)';
+                        } else if (period === 7 && group === 3) { 
+                            div.className = 'element empty arrow-placeholder';
+                            div.innerHTML = `<span class="arrow-text">89-103</span><span class="arrow-symbol">&darr;</span>`;
+                            div.title = '악티늄족 (아래 참조)';
+                        } else { 
+                            div.className = 'element empty';
+                        }
+                    }
+                    grid.appendChild(div);
+                }
+            }
+        }
+
+
+        function showDetail(element) {
+            const modal = document.getElementById('modal');
+            const detail = document.getElementById('elementDetail');
+
+            let groupDisplay = `${element.group}족`;
+            if (element.category === 'lanthanide') {
+                groupDisplay = '3족 (란타넘족)';
+            } else if (element.category === 'actinide') {
+                groupDisplay = '3족 (악티늄족)';
+            }
+
+            const simpleCategoryName = {
+                'metal': '금속',
+                'metalloid': '준금속',
+                'nonmetal': '비금속'
+            }[element.simpleCategory];
+
+            const stateName = {
+                'S': '고체 (Solid)',
+                'L': '액체 (Liquid)',
+                'G': '기체 (Gas)'
+            }[element.state];
+
+
+            detail.innerHTML = `
+                <h2>${element.symbol} - ${element.name}</h2>
+                <p style="color: #666; margin-bottom: 20px;">${element.nameEn}</p>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-label">원자번호</div>
+                        <div class="detail-value">${element.num}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">원자량</div>
+                        <div class="detail-value">${element.mass}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">족</div>
+                        <div class="detail-value">${groupDisplay}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">주기</div>
+                        <div class="detail-value">${element.period}주기</div>
+                    </div>
+                    <div class="detail-item" style="grid-column: 1 / -1;">
+                        <div class="detail-label">전자배치</div>
+                        <div class="detail-value">${element.electron}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">분류</div>
+                        <div class="detail-value">${simpleCategoryName}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">상태 (표준)</div>
+                        <div class="detail-value">${stateName}</div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'alkali': '알칼리 금속',
+                'alkaline-earth': '알칼리 토금속',
+                'transition': '전이금속',
+                'post-transition': '전이후 금속',
+                'metalloid': '준금속',
+                'nonmetal': '비금속',
+                'halogen': '할로겐',
+                'noble': '비활성기체',
+                'lanthanide': '란타넘족',
+                'actinide': '악티늄족'
+            };
+            return names[category] || category;
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const search = e.target.value.toLowerCase().trim();
+            const elementDivs = document.querySelectorAll('.element:not(.empty)');
+
+            elementDivs.forEach(div => {
+                div.classList.remove('highlight');
+            });
+
+            if (search) {
+                elements.forEach((element) => {
+                    if (element.name==(search) ||
+                        element.symbol.toLowerCase()==(search) ||
+                        element.num.toString()==(search) ||
+                        element.nameEn.toLowerCase()==(search)) {
+
+                        const targetDiv = Array.from(elementDivs).find(div =>
+                            div.dataset.num == element.num
+                        );
+
+                        if (targetDiv) {
+                            targetDiv.classList.add('highlight');
+                        }
+                    }
+                });
+            }
+        });
+
+        function resetHighlight() {
+            document.querySelectorAll('.element').forEach(div => {
+                div.classList.remove('highlight');
+            });
+            document.getElementById('searchInput').value = '';
+
+            if (quizMode) {
+                toggleQuizContainer();
+            }
+        }
+
+        function toggleQuizContainer() {
+            quizMode = !quizMode;
+            const quizContainer = document.getElementById('quizContainer');
+            const periodicTable = document.getElementById('periodicTable');
+            const controls = document.getElementById('mainControls');
+
+            if (quizMode) {
+                quizContainer.style.display = 'block';
+                periodicTable.style.display = 'none';
+                controls.style.display = 'none';
+
+                document.getElementById('quizSetup').style.display = 'block';
+                document.getElementById('quizInProgress').style.display = 'none';
+                document.getElementById('finalScoreContainer').style.display = 'none';
+                document.getElementById('quizErrorMessage').style.display = 'none';
+            } else {
+                quizContainer.style.display = 'none';
+                periodicTable.style.display = 'block';
+                controls.style.display = 'block';
+            }
+        }
+
+        function startQuiz() {
+            const startNum = parseInt(document.getElementById('quizStartNum').value);
+            const endNum = parseInt(document.getElementById('quizEndNum').value);
+            quizTotalQuestions = parseInt(document.getElementById('quizNumQuestions').value);
+            const errorMsg = document.getElementById('quizErrorMessage');
+
+            errorMsg.style.display = 'none';
+
+            if (isNaN(startNum) || isNaN(endNum) || startNum > endNum || startNum < 1 || endNum > 118) {
+                errorMsg.textContent = "원소 번호 범위를 올바르게 입력해주세요. (1 ~ 118)";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+             if (isNaN(quizTotalQuestions) || quizTotalQuestions < 1) {
+                 quizTotalQuestions = 1;
+                 document.getElementById('quizNumQuestions').value = 1;
+             }
+
+            quizElements = elements.filter(e => e.num >= startNum && e.num <= endNum);
+
+            if (quizElements.length < 4) {
+                errorMsg.textContent = "선택한 범위에 퀴즈를 만들기에 충분한 원소(최소 4개)가 없습니다.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            quizScore = 0;
+            currentQuizQuestionNum = 0;
+
+            document.getElementById('quizSetup').style.display = 'none';
+            document.getElementById('finalScoreContainer').style.display = 'none';
+            document.getElementById('quizInProgress').style.display = 'block';
+
+            nextQuestion();
+        }
+
+
+        function updateScore() {
+             document.getElementById('score').textContent = `문제: ${currentQuizQuestionNum} / ${quizTotalQuestions} | 점수: ${quizScore}`;
+        }
+
+        function nextQuestion() {
+            if (currentQuizQuestionNum >= quizTotalQuestions) {
+                showFinalScore();
+                return;
+            }
+
+            currentQuizQuestionNum++;
+            updateScore();
+
+            const questionTypes = ['symbol', 'name', 'number'];
+            const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+
+            currentQuestion = quizElements[Math.floor(Math.random() * quizElements.length)];
+            const options = [currentQuestion];
+
+            while (options.length < 4) {
+                const random = quizElements[Math.floor(Math.random() * quizElements.length)];
+                if (!options.includes(random)) {
+                    options.push(random);
+                }
+            }
+
+            options.sort(() => Math.random() - 0.5);
+
+            const questionMainEl = document.getElementById('quizQuestionMain');
+            const questionHintEl = document.getElementById('quizQuestionHint');
+            const optionsEl = document.getElementById('quizOptions');
+
+            optionsEl.innerHTML = '';
+
+            if (type === 'symbol') {
+                questionMainEl.textContent = '이 원소의 기호는?';
+                questionHintEl.textContent = `(원소 이름: ${currentQuestion.name})`;
+                optionsEl.innerHTML = options.map(opt =>
+                    `<div class="quiz-option" onclick="checkAnswer(this, '${opt.symbol}', '${currentQuestion.symbol}')">${opt.symbol}</div>`
+                ).join('');
+            } else if (type === 'name') {
+                questionMainEl.textContent = '이 원소의 이름은?';
+                questionHintEl.textContent = `(원소 기호: ${currentQuestion.symbol})`;
+                optionsEl.innerHTML = options.map(opt =>
+                    `<div class="quiz-option" onclick="checkAnswer(this, '${opt.name}', '${currentQuestion.name}')">${opt.name}</div>`
+                ).join('');
+            } else {
+                questionMainEl.textContent = '이 원소의 원자번호는?';
+                questionHintEl.textContent = `(원소 이름: ${currentQuestion.name})`;
+                optionsEl.innerHTML = options.map(opt =>
+                    `<div class="quiz-option" onclick="checkAnswer(this, '${opt.num}', '${currentQuestion.num}')">${opt.num}</div>`
+                ).join('');
+            }
+        }
+
+        function checkAnswer(selectedElement, selected, correct) {
+            const options = document.querySelectorAll('.quiz-option');
+            let isCorrect = false;
+
+            if (selected.toString() == correct.toString()) {
+                quizScore++;
+                isCorrect = true;
+            }
+
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                const optValue = opt.textContent;
+
+                if (optValue == correct.toString()) {
+                    opt.classList.add('correct');
+                }
+                if (opt === selectedElement && !isCorrect) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            updateScore();
+
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        }
+
+        function showFinalScore() {
+            document.getElementById('quizInProgress').style.display = 'none';
+            document.getElementById('finalScoreContainer').style.display = 'block';
+            document.getElementById('finalScore').textContent = `최종 점수: ${quizScore} / ${quizTotalQuestions}`;
+        }
+
+        renderTable();
+
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
