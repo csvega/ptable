@@ -296,6 +296,21 @@
       border-radius: 10px;
       border: 1px solid #ddd;
     }
+
+    /* 그리드 내부에 배치되는 원소 샘플 */
+    .element-key-container-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 2px solid #667eea;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+    }
+
     .element-key-sample {
       flex-shrink: 0;
     }
@@ -310,7 +325,7 @@
     }
     .element-key-legend {
       text-align: left;
-      font-size: 0.9em;
+      font-size: 0.85em;
     }
     .element-key-legend ul {
       list-style: none;
@@ -318,14 +333,16 @@
       margin: 0;
     }
     .element-key-legend li {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       color: #555;
+      line-height: 1.3;
     }
     .element-key-legend .key-label {
       font-weight: 600;
       color: #333;
       display: inline-block;
-      min-width: 80px;
+      min-width: 110px;
+      font-size: 0.9em;
     }
 
 
@@ -615,28 +632,6 @@
     </header>
 
     <div class="controls" id="mainControls">
-      <div class="element-key-container">
-        <div class="element-key-sample">
-           <div class="element">
-              <div class="atomic-number">6</div>
-              <div class="state state-solid">S</div>
-              <div class="symbol">C</div>
-              <div class="name">탄소</div>
-              <div class="mass">12.01</div>
-           </div>
-        </div>
-        <div class="element-key-legend">
-           <ul>
-              <li><span class="key-label">① (좌측상단)</span> 원자번호</li>
-              <li><span class="key-label">② (우측상단)</span> 상태 (고체/액체/기체)</li>
-              <li><span class="key-label">③ (중앙)</span> 원소기호</li>
-              <li><span class="key-label">④ (하단이름)</span> 원소이름</li>
-              <li><span class="key-label">⑤ (최하단)</span> 원자량</li>
-           </ul>
-        </div>
-      </div>
-
-
       <div class="control-row">
         <div class="search-box">
           <input type="text" id="searchInput" placeholder="원소명, 기호, 원자번호로 검색...">
@@ -886,7 +881,6 @@
 
         function renderTable() {
             const grid = document.getElementById('tableGrid');
-            const keySampleContainer = document.querySelector('.element-key-container');
             grid.innerHTML = '';
 
             const groupNames = {
@@ -903,7 +897,7 @@
             for (let group = 1; group <= 18; group++) {
                 const header = document.createElement('div');
                 header.className = 'group-header';
-                
+
                 const groupNumText = `${group}족`;
                 const familyName = groupNames[group] || null;
 
@@ -917,6 +911,33 @@
                 header.style.gridRow = 1;
                 grid.appendChild(header);
             }
+
+            // 원소 샘플을 그리드 내부에 추가 (1-2주기, 3-18족 사이)
+            const sampleContainer = document.createElement('div');
+            sampleContainer.className = 'element-key-container-grid';
+            sampleContainer.style.gridColumn = '5 / 12';  // 3족부터 18족까지
+            sampleContainer.style.gridRow = '2 / 4';  // 1주기와 2주기
+            sampleContainer.innerHTML = `
+                <div class="element-key-sample">
+                   <div class="element">
+                      <div class="atomic-number">6</div>
+                      <div class="state state-solid">S</div>
+                      <div class="symbol">C</div>
+                      <div class="name">탄소</div>
+                      <div class="mass">12.01</div>
+                   </div>
+                </div>
+                <div class="element-key-legend">
+                   <ul>
+                      <li><span class="key-label">① (좌측상단)</span> 원자번호</li>
+                      <li><span class="key-label">② (우측상단)</span> 상태 (고체/액체/기체)</li>
+                      <li><span class="key-label">③ (중앙)</span> 원소기호</li>
+                      <li><span class="key-label">④ (하단이름)</span> 원소이름</li>
+                      <li><span class="key-label">⑤ (최하단)</span> 원자량</li>
+                   </ul>
+                </div>
+            `;
+            grid.appendChild(sampleContainer);
 
 
             for (let period = 1; period <= 10; period++) {
