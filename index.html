@@ -297,7 +297,6 @@
       border: 1px solid #ddd;
     }
 
-    /* 그리드 내부에 배치되는 원소 샘플 */
     .element-key-container-grid {
       display: flex;
       flex-wrap: wrap;
@@ -912,11 +911,10 @@
                 grid.appendChild(header);
             }
 
-            // 원소 샘플을 그리드 내부에 추가 (1-2주기, 3-18족 사이)
             const sampleContainer = document.createElement('div');
             sampleContainer.className = 'element-key-container-grid';
-            sampleContainer.style.gridColumn = '5 / 12';  // 3족부터 18족까지
-            sampleContainer.style.gridRow = '2 / 4';  // 1주기와 2주기
+            sampleContainer.style.gridColumn = '5 / 12';
+            sampleContainer.style.gridRow = '2 / 4';
             sampleContainer.innerHTML = `
                 <div class="element-key-sample">
                    <div class="element">
@@ -1158,13 +1156,12 @@
                  quizTotalQuestions = 1;
                  document.getElementById('quizNumQuestions').value = 1;
              }
-             // ▼▼▼▼▼ 여기부터 수정/추가 ▼▼▼▼▼
-            selectedQuizTypes = []; // 배열 초기화
+
+             selectedQuizTypes = [];
             const checkboxes = document.querySelectorAll('.quiz-type-check:checked');
             
             checkboxes.forEach(cb => {
                 if (cb.value === 'description') {
-                    // '원소 특징'은 양방향(특징->이름, 이름->특징) 문제를 모두 포함
                     if (!selectedQuizTypes.includes('descriptionToName')) {
                         selectedQuizTypes.push('descriptionToName');
                     }
@@ -1172,7 +1169,6 @@
                         selectedQuizTypes.push('nameToDescription');
                     }
                 } else {
-                    // 'symbol', 'name', 'number' 추가
                     if (!selectedQuizTypes.includes(cb.value)) {
                         selectedQuizTypes.push(cb.value);
                     }
@@ -1184,7 +1180,6 @@
                 errorMsg.style.display = 'block';
                 return;
             }
-            // ▲▲▲▲▲ 여기까지 수정/추가 ▲▲▲▲▲
 
             quizElements = elements.filter(e => e.num >= startNum && e.num <= endNum);
 
@@ -1218,13 +1213,7 @@
             currentQuizQuestionNum++;
             updateScore();
 
-            // 5가지 질문 유형
-            //const questionTypes = ['symbol', 'name', 'number', 'descriptionToName', 'nameToDescription'];
-            //const type = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-
             const type = selectedQuizTypes[Math.floor(Math.random() * selectedQuizTypes.length)];
-            // ▲▲▲▲▲ 여기까지 변경 ▲▲▲▲▲
-
             currentQuestion = quizElements[Math.floor(Math.random() * quizElements.length)];
             const options = [currentQuestion];
 
@@ -1262,18 +1251,15 @@
                     `<div class="quiz-option" onclick="checkAnswer(this, '${opt.num}', '${currentQuestion.num}')">${opt.num}</div>`
                 ).join('');
             } else if (type === 'descriptionToName') {
-                // 특징을 보고 원소 이름 맞추기
                 questionMainEl.textContent = '다음 특징을 가진 원소는?';
                 questionHintEl.textContent = `${currentQuestion.description}`;
                 optionsEl.innerHTML = options.map(opt =>
                     `<div class="quiz-option" onclick="checkAnswer(this, '${opt.name}', '${currentQuestion.name}')">${opt.name}</div>`
                 ).join('');
             } else if (type === 'nameToDescription') {
-                // 원소 이름을 보고 특징 맞추기
                 questionMainEl.textContent = '이 원소의 특징은?';
                 questionHintEl.textContent = `(원소 이름: ${currentQuestion.name})`;
                 optionsEl.innerHTML = options.map(opt =>
-                    // 정답 확인은 이름(고유값)으로 하고, 표시는 설명으로 함
                     `<div class="quiz-option" onclick="checkAnswer(this, '${opt.name}', '${currentQuestion.name}')" style="font-size: 0.9em; line-height: 1.4; text-align: left; padding: 15px;">${opt.description || '정보 없음'}</div>`
                 ).join('');
             }
@@ -1283,32 +1269,26 @@
             const options = document.querySelectorAll('.quiz-option');
             let isCorrect = (selected.toString() === correct.toString());
 
-            // 1. 모든 옵션 클릭 비활성화
             options.forEach(opt => {
                 opt.style.pointerEvents = 'none';
             });
 
-            // 2. 선택한 옵션에 'correct' 또는 'wrong' 클래스 적용
             if (isCorrect) {
                 quizScore++;
                 selectedElement.classList.add('correct');
             } else {
-                // 3. 틀렸을 경우, 'wrong' 클래스 적용
                 selectedElement.classList.add('wrong');
             }
 
-            // 4. (틀렸을 경우) 정답 옵션을 찾아서 'correct' 클래스 적용
             if (!isCorrect) {
                 const questionType = document.getElementById('quizQuestionMain').textContent;
 
                 options.forEach(opt => {
-                    if (questionType.includes('특징은?')) { // nameToDescription (설명 맞추기)
-                        // 정답 원소(currentQuestion)의 설명을 가진 옵션을 찾음
+                    if (questionType.includes('특징은?')) {
                         if (opt.textContent === currentQuestion.description) {
                             opt.classList.add('correct');
                         }
-                    } else if (questionType.includes('가진 원소는?')) { // descriptionToName (이름 맞추기)
-                        // 정답 원소(currentQuestion)의 이름을 가진 옵션을 찾음
+                    } else if (questionType.includes('가진 원소는?')) { 
                         if (opt.textContent === currentQuestion.name) {
                             opt.classList.add('correct');
                         }
@@ -1327,11 +1307,8 @@
                     }
                 });
             }
-
-            // 5. 점수판 업데이트
             updateScore();
 
-            // 6. 다음 문제로 이동
             setTimeout(() => {
                 nextQuestion();
             }, 1500);
